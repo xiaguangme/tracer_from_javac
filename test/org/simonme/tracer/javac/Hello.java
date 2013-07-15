@@ -21,6 +21,11 @@ package org.simonme.tracer.javac;
 public class Hello
 {
     
+    public Hello()
+    {
+        
+    }
+    
     /** 
      * <一句话功能简述>
      * <功能详细描述>
@@ -40,6 +45,22 @@ public class Hello
     
     public String m3(String a1, String... a2)
     {
+        try{}catch(Exception e)
+        {
+          //
+            
+  
+        }
+        finally
+        {
+            //
+        }
         return a1;
+    }
+    
+    public static class TestSClass
+    {
+        public TestSClass()
+        {}
     }
 }

@@ -39,6 +39,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
+
 import javax.tools.JavaFileObject;
 
 /**
@@ -49,13 +50,13 @@ import javax.tools.JavaFileObject;
  * This code and its internal interfaces are subject to change or
  * deletion without notice.</b>
  */
-class RegularFileObject extends BaseFileObject {
+public class RegularFileObject extends BaseFileObject {
 
     /** Have the parent directories been created?
      */
     private boolean hasParents = false;
     private String name;
-    final File file;
+    public final File file;
     private Reference<File> absFileRef;
 
     public RegularFileObject(JavacFileManager fileManager, File f) {

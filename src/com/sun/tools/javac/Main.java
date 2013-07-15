@@ -64,7 +64,8 @@ public class Main {
         newargs[2] = "com.sun.tools.javac.Main";
         method.invoke(null, new Object[] { newargs });
       } else {
-        System.exit(compile(args));
+        int result = compile(args);
+        System.exit(result);
       }
     }
 

@@ -251,6 +251,7 @@ public class Scanner implements Lexer {
         
         // 初始化一份一样的 用于修改(插入追踪代码)
         buf4Modified = Arrays.copyOf(buf, buf.length);
+        buf4Modified[buflen] = ' ';
         scanChar();
     }
 
@@ -1174,7 +1175,7 @@ public class Scanner implements Lexer {
         char[] insertCodeChar = traceCode.toCharArray();
         char[] newChar4Modify = new char[this.buf4Modified.length + insertCodeCharLength];
         System.arraycopy(this.buf4Modified, 0, newChar4Modify, 0, startPos4Insert);
-        System.arraycopy(insertCodeChar, 0, newChar4Modify, startPos4Insert + 1, insertCodeCharLength);
+        System.arraycopy(insertCodeChar, 0, newChar4Modify, startPos4Insert, insertCodeCharLength);
         System.arraycopy(this.buf4Modified, startPos4Insert, newChar4Modify, endPos4Insert, this.buf4Modified.length - startPos4Insert);
         this.buf4Modified = newChar4Modify;
 //        testc = testc + 1;
@@ -1183,6 +1184,15 @@ public class Scanner implements Lexer {
 //            String s = new String(this.buf4Modified);
 //            System.out.println(s);
 //        }
+    }
+
+    /**
+     * 获取 buf4Modified
+     * @return 返回 buf4Modified
+     */
+    public char[] getBuf4Modified()
+    {
+        return buf4Modified;
     }
 
 }

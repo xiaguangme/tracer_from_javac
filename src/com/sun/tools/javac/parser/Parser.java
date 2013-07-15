@@ -1596,28 +1596,35 @@ public class Parser {
             
             // 先生成要插入的代码
             List<JCVariableDecl> argVariableList = List.nil();
-            if(additionalArgs != null && additionalArgs.length == 1
-                && additionalArgs[0] instanceof List)
-            {
+            
+            if(additionalArgs != null && additionalArgs.length == 2
+                && additionalArgs[0] instanceof List) {
                 argVariableList = (List<JCVariableDecl>)additionalArgs[0];
-            }
-            
-            StringBuffer tracerMethodCode = new StringBuffer("\nTracer.traceMethodInvoke");
-            tracerMethodCode.append("(");
-            
-            int i = 1;
-            for(JCVariableDecl variableDecl : argVariableList)
-            {
-                tracerMethodCode.append(variableDecl.name);
-                if(i != argVariableList.size())
-                {
-                    tracerMethodCode.append(", ");
+                boolean construct = (Boolean)additionalArgs[1];
+                if(!construct){
+                    
+                    StringBuffer tracerMethodCode = new StringBuffer(" \n\t\torg.simonme.tracer.trace.Tracer.traceMethodInvoke");
+                    tracerMethodCode.append("(");
+                    
+                    int i = 1;
+                    for(JCVariableDecl variableDecl : argVariableList)
+                    {
+                        tracerMethodCode.append(variableDecl.name);
+                        if(i != argVariableList.size())
+                        {
+                            tracerMethodCode.append(", ");
+                        }
+                        i++;
+                    }
+                    tracerMethodCode.append(");\n\t");
+                    
+                    // 再将其插入 
+                    S.insertTraceCode(tracerMethodCode.toString());
                 }
+                
             }
-            tracerMethodCode.append(");\n\n");
             
-            // 再将其插入 
-            S.insertTraceCode(tracerMethodCode.toString());
+            
         }
         
         List<JCStatement> stats = blockStatements();
@@ -2690,8 +2697,14 @@ public class Parser {
         JCExpression defaultValue;
         
         // 将参数列表传过去 便于trace方法拿到参数
-        Object[] additionalArgs = new Object[1];
+        boolean construct = false;
+        if("<init>".equals(name.toString()))
+        {
+            construct = true;
+        }
+        Object[] additionalArgs = new Object[2];
         additionalArgs[0] = params;
+        additionalArgs[1] = construct;
         
         if (S.token() == LBRACE) {
             body = block(BlockType.METHOD, additionalArgs);
