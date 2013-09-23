@@ -25,26 +25,78 @@
 
 package com.sun.tools.javac.main;
 
-import com.sun.tools.javac.code.Source;
-import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.jvm.Target;
-import com.sun.tools.javac.main.JavacOption.HiddenOption;
-import com.sun.tools.javac.main.JavacOption.Option;
-import com.sun.tools.javac.main.JavacOption.XOption;
-import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.ListBuffer;
-import com.sun.tools.javac.util.Log;
-import com.sun.tools.javac.util.Options;
-import com.sun.tools.javac.processing.JavacProcessingEnvironment;
+import static com.sun.tools.javac.main.OptionName.A;
+import static com.sun.tools.javac.main.OptionName.BOOTCLASSPATH;
+import static com.sun.tools.javac.main.OptionName.CLASSPATH;
+import static com.sun.tools.javac.main.OptionName.COMPLEXINFERENCE;
+import static com.sun.tools.javac.main.OptionName.CP;
+import static com.sun.tools.javac.main.OptionName.D;
+import static com.sun.tools.javac.main.OptionName.DEPRECATION;
+import static com.sun.tools.javac.main.OptionName.DJAVA_ENDORSED_DIRS;
+import static com.sun.tools.javac.main.OptionName.DJAVA_EXT_DIRS;
+import static com.sun.tools.javac.main.OptionName.DOE;
+import static com.sun.tools.javac.main.OptionName.ENCODING;
+import static com.sun.tools.javac.main.OptionName.ENDORSEDDIRS;
+import static com.sun.tools.javac.main.OptionName.EXTDIRS;
+import static com.sun.tools.javac.main.OptionName.FULLVERSION;
+import static com.sun.tools.javac.main.OptionName.G;
+import static com.sun.tools.javac.main.OptionName.G_CUSTOM;
+import static com.sun.tools.javac.main.OptionName.G_NONE;
+import static com.sun.tools.javac.main.OptionName.HELP;
+import static com.sun.tools.javac.main.OptionName.IMPLICIT;
+import static com.sun.tools.javac.main.OptionName.J;
+import static com.sun.tools.javac.main.OptionName.MOREINFO;
+import static com.sun.tools.javac.main.OptionName.NOWARN;
+import static com.sun.tools.javac.main.OptionName.O;
+import static com.sun.tools.javac.main.OptionName.PRINTSOURCE;
+import static com.sun.tools.javac.main.OptionName.PROCESSOR;
+import static com.sun.tools.javac.main.OptionName.PROCESSORPATH;
+import static com.sun.tools.javac.main.OptionName.PROC_CUSTOM;
+import static com.sun.tools.javac.main.OptionName.PROMPT;
+import static com.sun.tools.javac.main.OptionName.S;
+import static com.sun.tools.javac.main.OptionName.SOURCE;
+import static com.sun.tools.javac.main.OptionName.SOURCEFILE;
+import static com.sun.tools.javac.main.OptionName.SOURCEPATH;
+import static com.sun.tools.javac.main.OptionName.TARGET;
+import static com.sun.tools.javac.main.OptionName.TRACECODE;
+import static com.sun.tools.javac.main.OptionName.VERBOSE;
+import static com.sun.tools.javac.main.OptionName.VERSION;
+import static com.sun.tools.javac.main.OptionName.WARNUNCHECKED;
+import static com.sun.tools.javac.main.OptionName.WERROR;
+import static com.sun.tools.javac.main.OptionName.X;
+import static com.sun.tools.javac.main.OptionName.XBOOTCLASSPATH;
+import static com.sun.tools.javac.main.OptionName.XBOOTCLASSPATH_APPEND;
+import static com.sun.tools.javac.main.OptionName.XBOOTCLASSPATH_PREPEND;
+import static com.sun.tools.javac.main.OptionName.XD;
+import static com.sun.tools.javac.main.OptionName.XJCOV;
+import static com.sun.tools.javac.main.OptionName.XLINT;
+import static com.sun.tools.javac.main.OptionName.XLINT_CUSTOM;
+import static com.sun.tools.javac.main.OptionName.XMAXERRS;
+import static com.sun.tools.javac.main.OptionName.XMAXWARNS;
+import static com.sun.tools.javac.main.OptionName.XPREFER;
+import static com.sun.tools.javac.main.OptionName.XPRINT;
+import static com.sun.tools.javac.main.OptionName.XPRINTPROCESSORINFO;
+import static com.sun.tools.javac.main.OptionName.XPRINTROUNDS;
+import static com.sun.tools.javac.main.OptionName.XSTDOUT;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+
 import javax.lang.model.SourceVersion;
 
-import static com.sun.tools.javac.main.OptionName.*;
+import com.sun.tools.javac.code.Source;
+import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.jvm.Target;
+import com.sun.tools.javac.main.JavacOption.HiddenOption;
+import com.sun.tools.javac.main.JavacOption.Option;
+import com.sun.tools.javac.main.JavacOption.XOption;
+import com.sun.tools.javac.processing.JavacProcessingEnvironment;
+import com.sun.tools.javac.util.ListBuffer;
+import com.sun.tools.javac.util.Options;
 
 /**
  * TODO: describe com.sun.tools.javac.main.RecognizedOptions
@@ -166,6 +218,7 @@ public class RecognizedOptions {
         O,
         XJCOV,
         XD,
+        TRACECODE,
         SOURCEFILE);
 
     static Set<OptionName> javacFileManagerOptions = EnumSet.of(
@@ -222,6 +275,7 @@ public class RecognizedOptions {
         XPREFER,
         O,
         XJCOV,
+        TRACECODE,
         XD);
 
     static Option[] getJavaCompilerOptions(OptionHelper helper) {
@@ -246,6 +300,12 @@ public class RecognizedOptions {
 
     /**
      * @param out the writer to use for diagnostic output
+     * add by chenxiaguang on 2013-9-22
+     * 此方法被我增加了一个选项 new Option(TRACECODE, "opt.arg.trace", "opt.tracecode"),
+     * 注意！这个Option是分类放的，不能随意加在这个数组的任一个地方！
+     * 这个数组最后一个元素是要编译的源文件！不能改动！
+     * 检测参数是否合法，会依赖这些规则。
+     * 
      */
     public static Option[] getAll(final OptionHelper helper) {
         return new Option[]{
@@ -477,6 +537,8 @@ public class RecognizedOptions {
 
         // treat warnings as errors
         new Option(WERROR,                                      "opt.Werror"),
+        
+        new Option(TRACECODE, "opt.arg.trace", "opt.tracecode"),
 
         // use complex inference from context in the position of a method call argument
         new HiddenOption(COMPLEXINFERENCE),
@@ -575,7 +637,7 @@ public class RecognizedOptions {
                 return false;
             }
         },
-
+        
         /*
          * TODO: With apt, the matches method accepts anything if
          * -XclassAsDecls is used; code elsewhere does the lookup to

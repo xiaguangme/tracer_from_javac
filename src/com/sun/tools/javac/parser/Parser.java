@@ -213,6 +213,8 @@ public class Parser {
 
     /** The name table. */
     private Name.Table names;
+    
+    private Options options;
 
     /** Construct a parser from a given scanner, tree factory and log.
      */
@@ -222,6 +224,7 @@ public class Parser {
         this.S = S;
         S.nextToken(); // prime the pump
         this.F = fac.F;
+        this.options = fac.options;
         this.log = fac.log;
         this.names = fac.names;
         this.keywords = fac.keywords;
@@ -1603,28 +1606,29 @@ public class Parser {
                 boolean construct = (Boolean)additionalArgs[1];
                 if(!construct){
                     
-                    StringBuffer tracerMethodCode = new StringBuffer(" \n\t\torg.simonme.tracer.trace.Tracer.traceMethodInvoke");
-                    tracerMethodCode.append("(");
-                    
-                    int i = 1;
-                    for(JCVariableDecl variableDecl : argVariableList)
-                    {
-                        tracerMethodCode.append(variableDecl.name);
-                        if(i != argVariableList.size())
-                        {
-                            tracerMethodCode.append(", ");
+                    /**
+                     * trace的类名和方法是 通过-traceCode 选项指定。
+                     */
+                    String traceCode = this.options.get("-traceCode");
+                    if(traceCode != null){
+                        StringBuffer tracerMethodCode = new StringBuffer(" \n\t\t" + traceCode);
+                        tracerMethodCode.append("(");
+                        
+                        int i = 1;
+                        for(JCVariableDecl variableDecl : argVariableList){
+                            tracerMethodCode.append(variableDecl.name);
+                            if(i != argVariableList.size()){
+                                tracerMethodCode.append(", ");
+                            }
+                            i++;
                         }
-                        i++;
+                        tracerMethodCode.append(");\n\t");
+
+                        // 再将其插入 
+                        S.insertTraceCode(tracerMethodCode.toString());
                     }
-                    tracerMethodCode.append(");\n\t");
-                    
-                    // 再将其插入 
-                    S.insertTraceCode(tracerMethodCode.toString());
                 }
-                
             }
-            
-            
         }
         
         List<JCStatement> stats = blockStatements();

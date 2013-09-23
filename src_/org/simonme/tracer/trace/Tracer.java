@@ -11,7 +11,17 @@ import java.util.List;
 
 public class Tracer
 {
+    static ISkip skip;
     
+    static ITracerConfig config;
+    
+    static IArgumentsTracer argumentProcesser;
+    
+    static int traceLogBufferSize = (config == null ? 1024000 : config.getTracerLogBufferSize());
+    
+    static String traceLogPath = (config == null || config.getTraceLogFilePath() == null ? "d:/trace_log/"
+        : config.getTraceLogFilePath());
+
     static List<String> logs = new ArrayList<String>();
     
     static SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS");
@@ -24,21 +34,28 @@ public class Tracer
             return;
         }
         String log = Thread.currentThread().getStackTrace()[2].toString();
-        if(log.startsWith("com.sun.tools.javac.file.ZipFileIndex"))
+        if(getSkip() != null && skip.skipTraceMethodInvoke(log, args))
         {
             return;
         }
-        
-        if(log.startsWith("com.sun.tools.javac.file.RelativePath"))
-        {
-            return;
-        }
+//        if(log.startsWith("com.sun.tools.javac.file.ZipFileIndex"))
+//        {
+//            return;
+//        }
+//        
+//        if(log.startsWith("com.sun.tools.javac.file.RelativePath"))
+//        {
+//            return;
+//        }
         
             
         logs.add(log);
         logs.add("\n");
-//        for(Object arg : args){}
-        writeLog(1024000);
+        if(argumentProcesser != null)
+        {
+            argumentProcesser.traceArguments(logs, args);
+        }
+        writeLog(traceLogBufferSize);
         
 	}
     
@@ -57,7 +74,7 @@ public class Tracer
     {
         if(logs.size() >= limit)
         {
-            String fileName = "d:/compile_log/" + sdf.format(new Date(System.currentTimeMillis())) +".log";
+            String fileName = traceLogPath + sdf.format(new Date(System.currentTimeMillis())) +".log";
             
             FileWriter fw = null;
             
@@ -112,6 +129,60 @@ public class Tracer
                 }
             }
         }
+    }
+
+    /**
+     * 获取 skip
+     * @return 返回 skip
+     */
+    public static ISkip getSkip()
+    {
+        return skip;
+    }
+
+    /**
+     * 设置 skip
+     * @param 对skip进行赋值
+     */
+    public static void setSkip(ISkip skip)
+    {
+        Tracer.skip = skip;
+    }
+
+    /**
+     * 获取 config
+     * @return 返回 config
+     */
+    public static ITracerConfig getConfig()
+    {
+        return config;
+    }
+
+    /**
+     * 设置 config
+     * @param 对config进行赋值
+     */
+    public static void setConfig(ITracerConfig config)
+    {
+        Tracer.config = config;
+    }
+
+    /**
+     * 获取 argumentProcesser
+     * @return 返回 argumentProcesser
+     */
+    public static IArgumentsTracer getArgumentProcesser()
+    {
+        return argumentProcesser;
+    }
+
+    /**
+     * 设置 argumentProcesser
+     * @param 对argumentProcesser进行赋值
+     */
+    public static void setArgumentProcesser(IArgumentsTracer argumentProcesser)
+    {
+        Tracer.argumentProcesser = argumentProcesser;
     }
 }
                                                                                                                               
