@@ -919,12 +919,18 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 RegularFileObject rFIileObject = ((RegularFileObject)fileObject);
                 String absFilePath = rFIileObject.file.getAbsolutePath();
                 String fileName = rFIileObject.getName();
-                System.out.println(fileName);
+                
+                /**
+                 * 正反斜线都要可以 
+                 */
                 int firstBackslashIndex = fileName.indexOf('\\');
+                if(firstBackslashIndex < 0)
+                {
+                    firstBackslashIndex = fileName.indexOf('/');
+                }
                 if(firstBackslashIndex > 0)
                 {
                     String firstParentPath = fileName.substring(0, firstBackslashIndex);
-                    System.out.println(firstParentPath);
                     String newFileName = firstParentPath + "_" + fileName.substring(firstBackslashIndex);
                     int projectParentPathEndIndex = absFilePath.indexOf(fileName);
                     if(projectParentPathEndIndex > 0)
@@ -936,7 +942,6 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                             insertCodeFile.getParentFile().mkdirs();
                         }
                         
-                        System.out.println(newFileName);
                         FileWriter fw = null;
                         BufferedWriter bw = null;
                         try
@@ -974,10 +979,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                         
                     }
                 }
-//                System.out.println();
             }
-            
-            
          }
         return trees.toList();
     }
