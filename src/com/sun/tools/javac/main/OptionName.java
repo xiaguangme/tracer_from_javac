@@ -91,7 +91,7 @@ public enum OptionName {
     XJCOV("-Xjcov"),
     XD("-XD"),
     SOURCEFILE("sourcefile"),
-    TRACECODE("-traceCode");
+ TRACECODE("-traceCode"), SRCPATH("-srcPath");
 
     public final String optionName;
 

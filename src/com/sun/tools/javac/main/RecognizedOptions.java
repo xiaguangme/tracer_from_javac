@@ -57,6 +57,7 @@ import static com.sun.tools.javac.main.OptionName.S;
 import static com.sun.tools.javac.main.OptionName.SOURCE;
 import static com.sun.tools.javac.main.OptionName.SOURCEFILE;
 import static com.sun.tools.javac.main.OptionName.SOURCEPATH;
+import static com.sun.tools.javac.main.OptionName.SRCPATH;
 import static com.sun.tools.javac.main.OptionName.TARGET;
 import static com.sun.tools.javac.main.OptionName.TRACECODE;
 import static com.sun.tools.javac.main.OptionName.VERBOSE;
@@ -219,6 +220,7 @@ public class RecognizedOptions {
         XJCOV,
         XD,
         TRACECODE,
+ SRCPATH,
         SOURCEFILE);
 
     static Set<OptionName> javacFileManagerOptions = EnumSet.of(
@@ -538,7 +540,11 @@ public class RecognizedOptions {
         // treat warnings as errors
         new Option(WERROR,                                      "opt.Werror"),
         
-        new Option(TRACECODE, "opt.arg.trace", "opt.tracecode"),
+                /**
+                 * 指定用于trace的代码,和加工后代码的路径
+                 */
+                new Option(TRACECODE, "opt.arg.tracecode", "opt.tracecode"),
+                new Option(SRCPATH, "opt.arg.srcPath", "opt.srcPath"),
 
         // use complex inference from context in the position of a method call argument
         new HiddenOption(COMPLEXINFERENCE),

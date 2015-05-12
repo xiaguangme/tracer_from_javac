@@ -930,54 +930,57 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 }
                 if(firstBackslashIndex > 0)
                 {
-                    String firstParentPath = fileName.substring(0, firstBackslashIndex);
-                    String newFileName = firstParentPath + "_" + fileName.substring(firstBackslashIndex);
-                    int projectParentPathEndIndex = absFilePath.indexOf(fileName);
-                    if(projectParentPathEndIndex > 0)
+                    //                    String firstParentPath = fileName.substring(0, firstBackslashIndex);
+//                    String newFileName = firstParentPath + "_" + fileName.substring(firstBackslashIndex);
+                    Options options = Options.instance(context);
+                    String srcPath = options.get("-srcPath");
+                    if (srcPath.endsWith("\\") || srcPath.endsWith("/"))
                     {
-                        newFileName = absFilePath.substring(0, projectParentPathEndIndex) + newFileName;
-                        File insertCodeFile = new File(newFileName);
-                        if(!insertCodeFile.getParentFile().exists())
-                        {
-                            insertCodeFile.getParentFile().mkdirs();
-                        }
-                        
-                        FileWriter fw = null;
-                        BufferedWriter bw = null;
-                        try
-                        {
-                            fw = new FileWriter(insertCodeFile);
-                            bw = new BufferedWriter(fw);
-                            
-                            // 将末尾空字符全部处理成空格
-                            char[] buf4Modified = this.scanner.getBuf4Modified();
-                            for(int i = buf4Modified.length - 1; i>=0; i--)
-                            {
-                                if(buf4Modified[i] == 0)
-                                {
-                                    buf4Modified[i] = ' ';
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            bw.write(buf4Modified);
-                            bw.flush();
-                        }
-                        finally
-                        {
-                            if(fw != null)
-                            {
-                                fw.close();
-                            }
-                            if(bw != null)
-                            {
-                                bw.close();
-                            }
-                        }
-                        
+                        srcPath = srcPath.substring(0, srcPath.length() - 1);
                     }
+                    String genCodeDir = srcPath + "_";
+                    String newFileName = genCodeDir + "/" + absFilePath.substring(srcPath.length() + 1);
+                    File insertCodeFile = new File(newFileName);
+                    if (!insertCodeFile.getParentFile().exists())
+                    {
+                        insertCodeFile.getParentFile().mkdirs();
+                    }
+
+                    FileWriter fw = null;
+                    BufferedWriter bw = null;
+                    try
+                    {
+                        fw = new FileWriter(insertCodeFile);
+                        bw = new BufferedWriter(fw);
+                        
+                        // 将末尾空字符全部处理成空格
+                        char[] buf4Modified = this.scanner.getBuf4Modified();
+                        for (int i = buf4Modified.length - 1; i >= 0; i--)
+                        {
+                            if (buf4Modified[i] == 0)
+                            {
+                                buf4Modified[i] = ' ';
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        bw.write(buf4Modified);
+                        bw.flush();
+                    }
+                    finally
+                    {
+                        if (fw != null)
+                        {
+                            fw.close();
+                        }
+                        if (bw != null)
+                        {
+                            bw.close();
+                        }
+                    }
+                        
                 }
             }
          }
